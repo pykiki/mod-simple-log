@@ -132,10 +132,15 @@ class Simple_log_broker(BaseModule):
             self.check_and_do_archive()
             return manage(brok)
 
-    # A service check have just arrived, we UPDATE data info with this
+    # A log brok has just arrived, we write log in a file ...
     def manage_log_brok(self, b):
         data = b.data
-        self.file.write(data['log'].encode('UTF-8'))
+        # Protect if we receive a log that is already utf-8 encoded 
+		# and that contains special characters ...
+        try:
+            self.file.write(data['log'].encode('UTF-8'))
+        except UnicodeDecodeError as e:
+            self.file.write(data['log'])
         self.file.flush()
 
     def init(self):
